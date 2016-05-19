@@ -30,6 +30,7 @@ public class GamePanel extends JPanel implements ActionListener{
 			y += 64;
 			x -= 704;
 		}
+		y -= 320;
 	}
 	
 	public GamePanel(){
@@ -57,12 +58,13 @@ public class GamePanel extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e){
 		if(aliens[0][0].getX() < 0 || aliens[0][10].getX() > 800-64){
 			x -= xVelocity;
+			y += 5;
 			xVelocity *= -1;
 		}
 		else{
 			x += xVelocity;
 		}
-		y = 30;
+		//y = 30;
 		resetAliens();
 		repaint();
 	}
