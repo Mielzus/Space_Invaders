@@ -11,10 +11,16 @@ public class GamePanel extends JPanel implements ActionListener{
 	private ImageIcon largeAlien_1 = new ImageIcon("images/aliens/largeInvader.png");
 	private ImageIcon largeAlien_2 = new ImageIcon("images/aliens/largeInvader_2.png");
 	private ImageIcon ufo = new ImageIcon("images/aliens/ufo.png");
+	private ImageIcon cannon = new ImageIcon("images/cannon/laserCannon.png");
+	private ImageIcon bullet = new ImageIcon("images/cannon/bullet.png");
+	
 	private Timer tm = new Timer(5, this);
 	private Alien[][] aliens = new Alien[5][11];
-	int x, y, xVelocity = 1, counter, version = 1;
-	int winX = 1000, winY = 700;
+	
+	private int winX = 1000, winY = 700;
+	private int cannonX = winX/2 -32, cannonY = winY-75;
+	private int x, y, xVelocity = 1;
+	private int counter, version = 1;
 	
 	private void resetAliens(){
 		for(int i = 0; i < aliens.length; i++){
@@ -63,14 +69,18 @@ public class GamePanel extends JPanel implements ActionListener{
 					(temp.getIcon()).paintIcon(this, g, temp.getX(), temp.getY());
 			}
 		}
+		g.drawString("Cannon", cannonX, cannonY);
+		cannon.paintIcon(this, g, cannonX, cannonY);
 	}
 	
 	public void actionPerformed(ActionEvent e){
 		if(aliens[0][0].getX() < 0 || aliens[0][10].getX() > winX-64){
 			x -= xVelocity;
-			y += 5;
+			y += 10;
 			xVelocity *= -1;
 		}
+		else if(aliens[4][0].getY() > winY-64)
+			xVelocity = 0;
 		else{
 			x += xVelocity;
 		}
