@@ -19,7 +19,7 @@ public class GamePanel extends JPanel implements ActionListener{
 	
 	private int winX = 1000, winY = 700;
 	private int cannonX = winX/2 -32, cannonY = winY-75;
-	private int x, y, xVelocity = 1;
+	private int x = 148, y = 60, alienVelocity = 1, cannonVelocity = 0;
 	private int counter, version = 1;
 	
 	private void resetAliens(){
@@ -51,8 +51,6 @@ public class GamePanel extends JPanel implements ActionListener{
 	
 	public GamePanel(){
 		tm.start();
-		x = 148;
-		y = 60;
 		resetAliens();
 	}
 	
@@ -69,25 +67,46 @@ public class GamePanel extends JPanel implements ActionListener{
 					(temp.getIcon()).paintIcon(this, g, temp.getX(), temp.getY());
 			}
 		}
-		g.drawString("Cannon", cannonX, cannonY);
 		cannon.paintIcon(this, g, cannonX, cannonY);
 	}
 	
 	public void actionPerformed(ActionEvent e){
 		if(aliens[0][0].getX() < 0 || aliens[0][10].getX() > winX-64){
-			x -= xVelocity;
+			x -= alienVelocity;
 			y += 10;
-			xVelocity *= -1;
+			alienVelocity *= -1;
 		}
 		else if(aliens[4][0].getY() > winY-64)
-			xVelocity = 0;
+			alienVelocity = 0;
 		else{
-			x += xVelocity;
+			x += alienVelocity;
 		}
+		cannonX += cannonVelocity;
 		counter++;
 		if(counter % 50 == 0)
 			version *= -1;
 		resetAliens();
 		repaint();
+	}
+	
+	public void passPressedKey(int keyCode){
+		if(keyCode == KeyEvent.VK_LEFT){
+			cannonVelocity = -3;
+		}
+		if(keyCode == KeyEvent.VK_RIGHT){
+			cannonVelocity = 3;
+		}
+		if(keyCode == KeyEvent.VK_SPACE){
+			System.out.println("Space");
+		}
+	}
+	
+	public void passReleasedKey(int keyCode){
+		if(keyCode == KeyEvent.VK_LEFT){
+			cannonVelocity = 0;
+		}
+		if(keyCode == KeyEvent.VK_RIGHT){
+			cannonVelocity = 0;
+		}
 	}
 }

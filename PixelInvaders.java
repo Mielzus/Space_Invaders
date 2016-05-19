@@ -1,10 +1,28 @@
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 
 public class PixelInvaders extends JFrame{
 	
 	public PixelInvaders(){
-		GamePanel panel = new GamePanel();
+		GamePanel panel = new GamePanel();		
+		panel.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				panel.passReleasedKey(e.getKeyCode());
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				panel.passPressedKey(e.getKeyCode());				
+			}
+		});
+		panel.setFocusable(true);
+		panel.requestFocusInWindow();
 		this.add(panel);
 	}
 	
