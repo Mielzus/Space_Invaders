@@ -13,18 +13,28 @@ public class GamePanel extends JPanel implements ActionListener{
 	private ImageIcon ufo = new ImageIcon("images/aliens/ufo.png");
 	private Timer tm = new Timer(5, this);
 	private Alien[][] aliens = new Alien[5][11];
-	int x, y, xVelocity = -1;
+	int x, y, xVelocity = 1, counter, version = 1;
+	int winX = 1000, winY = 700;
 	
 	private void resetAliens(){
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
-				if(i < 1)
-					aliens[i][j] = new Alien(x, y, 10, smallAlien_1);
-				else if(i < 3)
-					aliens[i][j] = new Alien(x, y, 20, mediumAlien_1);
-				else if(i < 5)
-					aliens[i][j] = new Alien(x, y, 30, largeAlien_1);
-				
+				if(version == -1){
+					if(i < 1)
+						aliens[i][j] = new Alien(x, y, 10, smallAlien_1);
+					else if(i < 3)
+						aliens[i][j] = new Alien(x, y, 20, mediumAlien_1);
+					else if(i < 5)
+						aliens[i][j] = new Alien(x, y, 30, largeAlien_1);
+				}
+				else if(version == 1){
+					if(i < 1)
+						aliens[i][j] = new Alien(x, y, 10, smallAlien_2);
+					else if(i < 3)
+						aliens[i][j] = new Alien(x, y, 20, mediumAlien_2);
+					else if(i < 5)
+						aliens[i][j] = new Alien(x, y, 30, largeAlien_2);
+				}
 				x += 64;
 			}
 			y += 64;
@@ -35,15 +45,15 @@ public class GamePanel extends JPanel implements ActionListener{
 	
 	public GamePanel(){
 		tm.start();
-		x = 48;
-		y = 30;
+		x = 148;
+		y = 60;
 		resetAliens();
 	}
 	
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
 		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, 800, 600);
+		g.fillRect(0, 0, winX, winY);
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
 				Alien temp = aliens[i][j];
@@ -56,7 +66,7 @@ public class GamePanel extends JPanel implements ActionListener{
 	}
 	
 	public void actionPerformed(ActionEvent e){
-		if(aliens[0][0].getX() < 0 || aliens[0][10].getX() > 800-64){
+		if(aliens[0][0].getX() < 0 || aliens[0][10].getX() > winX-64){
 			x -= xVelocity;
 			y += 5;
 			xVelocity *= -1;
@@ -64,7 +74,9 @@ public class GamePanel extends JPanel implements ActionListener{
 		else{
 			x += xVelocity;
 		}
-		//y = 30;
+		counter++;
+		if(counter % 50 == 0)
+			version *= -1;
 		resetAliens();
 		repaint();
 	}
