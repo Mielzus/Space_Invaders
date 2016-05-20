@@ -35,6 +35,8 @@ public class GamePanel extends JPanel implements ActionListener{
 	private int alienVelocity = 1, cannonXVel = 0, cannonYVel = 0;
 	/** Counter variable **/
 	private int counter, version = 1;
+	/** The variable to hold the players score **/
+	private int score;
 	
 	/**
 	  * Creates new alien objects and places them relative to the current 
@@ -128,12 +130,15 @@ public class GamePanel extends JPanel implements ActionListener{
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
 				Alien temp = aliens[i][j];
-				//g.setColor(Color.WHITE);
-				//g.drawString(Integer.toString(temp.getScore()), temp.getX(), temp.getY());
 				if(temp.getVisible())
 					(temp.getIcon()).paintIcon(this, g, temp.getX(), temp.getY());
 			}
 		}
+		g.setColor(Color.WHITE);
+		g.setFont(new Font("VERDANA", Font.BOLD, 25));
+		g.drawString("Score", 50, 55);
+		g.drawString(Integer.toString(score), 140, 55);
+		g.drawString("Lives", 700, 55);
 		cannon.getIcon().paintIcon(this, g, cannon.getX(), cannon.getY());
 	}
 	
@@ -141,6 +146,8 @@ public class GamePanel extends JPanel implements ActionListener{
 	  * Moves the aliens according the their set velocity
 	  * Moves the cannon based on user keypresses
 	  * Changes the aliens appearance after a number of cycles
+	  * Checks if there is a collision between the aliens and cannon
+	  * Adds to score if there is a collision
 	  */
 	public void actionPerformed(ActionEvent e){
 		if(aliens[0][0].getX() < 0 || aliens[0][10].getX() > winX-64){
@@ -155,8 +162,16 @@ public class GamePanel extends JPanel implements ActionListener{
 		}
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
-				if(aliens[i][j].getVisible())
-					aliens[i][j].setVisible(!collision(aliens[i][j], cannon));
+				//If the alien is visible
+				if(aliens[i][j].getVisible()){
+					//If there is a collision between the two objects
+					if(collision(aliens[i][j], cannon) && aliens[i][j].getVisible()){
+						//Sets the visibility of the alien to false
+						aliens[i][j].setVisible(!collision(aliens[i][j], cannon));
+						//Increments the score by the aliens score value
+						score += aliens[i][j].getScore();
+					}
+				}
 			}
 		}
 		cannon.setX(cannon.getX() + cannonXVel);
