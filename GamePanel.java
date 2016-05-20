@@ -11,38 +11,43 @@ public class GamePanel extends JPanel implements ActionListener{
 	private ImageIcon mediumAlien_2 = new ImageIcon("images/aliens/mediumInvader_2.png");
 	private ImageIcon largeAlien_1 = new ImageIcon("images/aliens/largeInvader.png");
 	private ImageIcon largeAlien_2 = new ImageIcon("images/aliens/largeInvader_2.png");
-	/** Icon for bonus UFO **/
 	private ImageIcon bonusUFO = new ImageIcon("images/aliens/ufo.png");
-	/** Player cannon **/
 	private ImageIcon laserCannon = new ImageIcon("images/cannon/laserCannon.png");
-	/** Game bullet **/
-	private ImageIcon bullet = new ImageIcon("images/cannon/bullet.png");
+	private ImageIcon bullet = new ImageIcon("images/cannon/laser.png");
 	
 	/** Timer to create an action at the end of each interval **/
 	private Timer tm = new Timer(5, this);
 	/** The array to hold all of the alien objects **/
 	private Alien[][] aliens = new Alien[5][11];
-	/** The object holding the player cannon data **/
-	private Alien cannon;
 	
 	/**Game window dimensions **/
 	private int winX = 1000, winY = 700;
 	/** Cannon position **/
 	private int cannonX = winX/2 -32, cannonY = winY-75;
+	/** laser position **/
+	private int laserX, laserY;
 	/** Alien start location **/
 	private int x = 148, y = 60;
-	/** Velocity for the aliens and cannon **/
-	private int alienVelocity = 1, cannonXVel = 0, cannonYVel = 0;
+	/** Amount of pixels Alien objects move **/
+	private int alienVelocity = 1, cannonXVel = 0, laserVelocity = 0;;
 	/** Counter variable **/
 	private int counter, version = 1;
 	/** The variable to hold the players score **/
 	private int score;
+	
+	/** Game UFO **/
+	private Alien ufo = new Alien(0, 0, 0, bonusUFO);
+	/** Player cannon **/
+	private Alien cannon = new Alien(cannonX, cannonY, 0, laserCannon);
+	/** Game bullet **/
+	private Alien laser = new Alien(0, 0, 0, bullet);
 	
 	/**
 	  * Creates new alien objects and places them relative to the current 
 	  * x and y values
 	  */
 	private void resetAliens(){
+		laser.setVisible(false);
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
 				if(i < 1)
@@ -98,7 +103,6 @@ public class GamePanel extends JPanel implements ActionListener{
 	public GamePanel(){
 		tm.start();
 		resetAliens();
-		cannon = new Alien(cannonX, cannonY, 0, laserCannon);
 	}
 	
 	/**
@@ -134,12 +138,16 @@ public class GamePanel extends JPanel implements ActionListener{
 					(temp.getIcon()).paintIcon(this, g, temp.getX(), temp.getY());
 			}
 		}
+		if(laser.getVisible())
+			laser.getIcon().paintIcon(this, g, laser.getX(), laser.getY());
+		
+		cannon.getIcon().paintIcon(this, g, cannon.getX(), cannon.getY());
+		
 		g.setColor(Color.WHITE);
 		g.setFont(new Font("VERDANA", Font.BOLD, 25));
 		g.drawString("Score", 50, 55);
 		g.drawString(Integer.toString(score), 140, 55);
-		g.drawString("Lives", 700, 55);
-		cannon.getIcon().paintIcon(this, g, cannon.getX(), cannon.getY());
+		//g.drawString("Lives", 700, 55);
 	}
 	
 	/**
@@ -152,22 +160,26 @@ public class GamePanel extends JPanel implements ActionListener{
 	public void actionPerformed(ActionEvent e){
 		if(aliens[0][0].getX() < 0 || aliens[0][10].getX() > winX-64){
 			x -= alienVelocity;
-			y += 10;
+			y += 5;
 			alienVelocity *= -1;
 		}
-		else if(aliens[4][0].getY() > winY-64)
-			alienVelocity = 0;
 		else{
 			x += alienVelocity;
 		}
+		
+		if(aliens[4][0].getY() > winY-64)
+			alienVelocity = 0;
+		
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
 				//If the alien is visible
 				if(aliens[i][j].getVisible()){
-					//If there is a collision between the two objects
-					if(collision(aliens[i][j], cannon) && aliens[i][j].getVisible()){
+					//Checks if there is a collision between the two objects
+					if(collision(aliens[i][j], laser) && aliens[i][j].getVisible() && laser.getVisible()){
 						//Sets the visibility of the alien to false
-						aliens[i][j].setVisible(!collision(aliens[i][j], cannon));
+						aliens[i][j].setVisible(!collision(aliens[i][j], laser));
+						//Sets the visibility of the laser to false
+						laser.setVisible(false);
 						//Increments the score by the aliens score value
 						score += aliens[i][j].getScore();
 					}
@@ -175,10 +187,9 @@ public class GamePanel extends JPanel implements ActionListener{
 			}
 		}
 		cannon.setX(cannon.getX() + cannonXVel);
-		cannon.setY(cannon.getY() + cannonYVel);
-		
+		laser.setY(laser.getY() + laserVelocity);
 		counter++;
-		if(counter % 50 == 0)
+		if(counter % 75 == 0)
 			version *= -1;
 		updateAliens();
 		repaint();
@@ -189,17 +200,19 @@ public class GamePanel extends JPanel implements ActionListener{
 	  * @param keyCode the ASCII code of the keypress from the user
 	  */
 	public void passPressedKey(int keyCode){
-		if(keyCode == KeyEvent.VK_UP){
-			cannonYVel = -3;
-		}
-		if(keyCode == KeyEvent.VK_DOWN){
-			cannonYVel = 3;
-		}
 		if(keyCode == KeyEvent.VK_LEFT){
 			cannonXVel = -3;
 		}
 		if(keyCode == KeyEvent.VK_RIGHT){
 			cannonXVel = 3;
+		}
+		if(keyCode == KeyEvent.VK_SPACE){
+			if(!laser.getVisible()){
+				laser.setX(cannon.getX() + laserCannon.getIconWidth()/2 - 4);
+				laser.setY(cannon.getY() + 16);
+				laser.setVisible(true);
+				laserVelocity = -5;
+			}
 		}
 	}
 	
@@ -208,12 +221,6 @@ public class GamePanel extends JPanel implements ActionListener{
 	  * @param keyCode the ASCII code of the key release from the user
 	  */
 	public void passReleasedKey(int keyCode){
-		if(keyCode == KeyEvent.VK_UP){
-			cannonYVel = 0;
-		}
-		if(keyCode == KeyEvent.VK_DOWN){
-			cannonYVel = 0;
-		}
 		if(keyCode == KeyEvent.VK_LEFT){
 			cannonXVel = 0;
 		}
