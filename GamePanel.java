@@ -187,13 +187,24 @@ public class GamePanel extends JPanel implements ActionListener{
 			}
 		}
 		
+		if(cannon.getX() < -5){
+			cannon.setX(-5);
+			cannonXVel = 0;
+		}
+		else if(cannon.getX() > winX-60){
+			cannon.setX(winX-60);
+			cannonXVel = 0;
+		}
+		else{
+			cannon.setX(cannon.getX() + cannonXVel);
+		}
+		
+		laser.setY(laser.getY() + laserVelocity);
 		if(laser.getY() < 0){
 			laser.setVisible(false);
 			laserVelocity = 0;
 		}
 		
-		cannon.setX(cannon.getX() + cannonXVel);
-		laser.setY(laser.getY() + laserVelocity);
 		counter++;
 		if(counter % 75 == 0)
 			version *= -1;
