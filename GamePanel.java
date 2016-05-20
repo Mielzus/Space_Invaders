@@ -12,9 +12,9 @@ public class GamePanel extends JPanel implements ActionListener{
 	private ImageIcon largeAlien_1 = new ImageIcon("images/aliens/largeInvader.png");
 	private ImageIcon largeAlien_2 = new ImageIcon("images/aliens/largeInvader_2.png");
 	/** Icon for bonus UFO **/
-	private ImageIcon ufo = new ImageIcon("images/aliens/ufo.png");
+	private ImageIcon bonusUFO = new ImageIcon("images/aliens/ufo.png");
 	/** Player cannon **/
-	private ImageIcon cannon = new ImageIcon("images/cannon/laserCannon.png");
+	private ImageIcon laserCannon = new ImageIcon("images/cannon/laserCannon.png");
 	/** Game bullet **/
 	private ImageIcon bullet = new ImageIcon("images/cannon/bullet.png");
 	
@@ -22,6 +22,8 @@ public class GamePanel extends JPanel implements ActionListener{
 	private Timer tm = new Timer(5, this);
 	/** The array to hold all of the alien objects **/
 	private Alien[][] aliens = new Alien[5][11];
+	/** The object holding the player cannon data **/
+	private Alien cannon;
 	
 	/**Game window dimensions **/
 	private int winX = 1000, winY = 700;
@@ -30,7 +32,7 @@ public class GamePanel extends JPanel implements ActionListener{
 	/** Alien start location **/
 	private int x = 148, y = 60;
 	/** Velocity for the aliens and cannon **/
-	private int alienVelocity = 1, cannonVelocity = 0;
+	private int alienVelocity = 1, cannonXVel = 0, cannonYVel = 0;
 	/** Counter variable **/
 	private int counter, version = 1;
 	
@@ -41,21 +43,43 @@ public class GamePanel extends JPanel implements ActionListener{
 	private void resetAliens(){
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
+				if(i < 1)
+					aliens[i][j] = new Alien(x, y, 10, smallAlien_1);
+				else if(i < 3)
+					aliens[i][j] = new Alien(x, y, 20, mediumAlien_1);
+				else if(i < 5)
+					aliens[i][j] = new Alien(x, y, 30, largeAlien_1);
+				x += 64;
+			}
+			y += 64;
+			x -= 704;
+		}
+		y -= 320;
+	}
+	
+	/**
+	  * Updates the x and y positions of the alien objects
+	  */
+	private void updateAliens(){
+		for(int i = 0; i < aliens.length; i++){
+			for(int j = 0; j < aliens[i].length; j++){
+				aliens[i][j].setX(x);
+				aliens[i][j].setY(y);
 				if(version == -1){
 					if(i < 1)
-						aliens[i][j] = new Alien(x, y, 10, smallAlien_1);
+						aliens[i][j].setIcon(smallAlien_1);
 					else if(i < 3)
-						aliens[i][j] = new Alien(x, y, 20, mediumAlien_1);
+						aliens[i][j].setIcon(mediumAlien_1);
 					else if(i < 5)
-						aliens[i][j] = new Alien(x, y, 30, largeAlien_1);
+						aliens[i][j].setIcon(largeAlien_1);
 				}
 				else if(version == 1){
 					if(i < 1)
-						aliens[i][j] = new Alien(x, y, 10, smallAlien_2);
+						aliens[i][j].setIcon(smallAlien_2);
 					else if(i < 3)
-						aliens[i][j] = new Alien(x, y, 20, mediumAlien_2);
+						aliens[i][j].setIcon(mediumAlien_2);
 					else if(i < 5)
-						aliens[i][j] = new Alien(x, y, 30, largeAlien_2);
+						aliens[i][j].setIcon(largeAlien_2);
 				}
 				x += 64;
 			}
@@ -72,6 +96,25 @@ public class GamePanel extends JPanel implements ActionListener{
 	public GamePanel(){
 		tm.start();
 		resetAliens();
+		cannon = new Alien(cannonX, cannonY, 0, laserCannon);
+	}
+	
+	/**
+	  * Detects if there is a collision between two Alien objects
+	  * @param one The first object to compare
+	  * @param two The second object to compare
+	  * @return true or false based on collision status
+	  */
+	public boolean collision(Alien one, Alien two){
+		int oneMidX = one.getX() +  one.getIcon().getIconWidth()/2;
+		int oneMidY = one.getY() +  one.getIcon().getIconHeight()/2;
+		int twoMidX = two.getX() +  two.getIcon().getIconWidth()/2;
+		int twoMidY = two.getY() +  two.getIcon().getIconHeight()/2;
+		if(Math.abs(oneMidX - twoMidX) < (one.getIcon().getIconWidth()/2 + two.getIcon().getIconWidth()/2) 
+			&& Math.abs(oneMidY - twoMidY) < (one.getIcon().getIconHeight()/2 + two.getIcon().getIconHeight()/2))
+			return true;
+		else
+			return false;
 	}
 	
 	/**
@@ -85,13 +128,13 @@ public class GamePanel extends JPanel implements ActionListener{
 		for(int i = 0; i < aliens.length; i++){
 			for(int j = 0; j < aliens[i].length; j++){
 				Alien temp = aliens[i][j];
-				g.setColor(Color.WHITE);
-				g.drawString(Integer.toString(temp.getScore()), temp.getX(), temp.getY());
+				//g.setColor(Color.WHITE);
+				//g.drawString(Integer.toString(temp.getScore()), temp.getX(), temp.getY());
 				if(temp.getVisible())
 					(temp.getIcon()).paintIcon(this, g, temp.getX(), temp.getY());
 			}
 		}
-		cannon.paintIcon(this, g, cannonX, cannonY);
+		cannon.getIcon().paintIcon(this, g, cannon.getX(), cannon.getY());
 	}
 	
 	/**
@@ -110,11 +153,19 @@ public class GamePanel extends JPanel implements ActionListener{
 		else{
 			x += alienVelocity;
 		}
-		cannonX += cannonVelocity;
+		for(int i = 0; i < aliens.length; i++){
+			for(int j = 0; j < aliens[i].length; j++){
+				if(aliens[i][j].getVisible())
+					aliens[i][j].setVisible(!collision(aliens[i][j], cannon));
+			}
+		}
+		cannon.setX(cannon.getX() + cannonXVel);
+		cannon.setY(cannon.getY() + cannonYVel);
+		
 		counter++;
 		if(counter % 50 == 0)
 			version *= -1;
-		resetAliens();
+		updateAliens();
 		repaint();
 	}
 	
@@ -123,11 +174,17 @@ public class GamePanel extends JPanel implements ActionListener{
 	  * @param keyCode the ASCII code of the keypress from the user
 	  */
 	public void passPressedKey(int keyCode){
+		if(keyCode == KeyEvent.VK_UP){
+			cannonYVel = -3;
+		}
+		if(keyCode == KeyEvent.VK_DOWN){
+			cannonYVel = 3;
+		}
 		if(keyCode == KeyEvent.VK_LEFT){
-			cannonVelocity = -3;
+			cannonXVel = -3;
 		}
 		if(keyCode == KeyEvent.VK_RIGHT){
-			cannonVelocity = 3;
+			cannonXVel = 3;
 		}
 	}
 	
@@ -136,11 +193,17 @@ public class GamePanel extends JPanel implements ActionListener{
 	  * @param keyCode the ASCII code of the key release from the user
 	  */
 	public void passReleasedKey(int keyCode){
+		if(keyCode == KeyEvent.VK_UP){
+			cannonYVel = 0;
+		}
+		if(keyCode == KeyEvent.VK_DOWN){
+			cannonYVel = 0;
+		}
 		if(keyCode == KeyEvent.VK_LEFT){
-			cannonVelocity = 0;
+			cannonXVel = 0;
 		}
 		if(keyCode == KeyEvent.VK_RIGHT){
-			cannonVelocity = 0;
+			cannonXVel = 0;
 		}
 	}
 }

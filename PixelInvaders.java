@@ -6,16 +6,15 @@ public class PixelInvaders extends JFrame{
 	
 	public PixelInvaders(){
 		GamePanel panel = new GamePanel();		
-		panel.addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
+		panel.addKeyListener(new KeyListener(){
+			
+			public void keyPressed(KeyEvent e){
+				panel.passPressedKey(e.getKeyCode());
+			}
+			public void keyReleased(KeyEvent e){
 				panel.passReleasedKey(e.getKeyCode());
 			}
-			@Override
-			public void keyPressed(KeyEvent e) {
-				panel.passPressedKey(e.getKeyCode());				
-			}
+			public void keyTyped(KeyEvent e){}
 		});
 		panel.setFocusable(true);
 		panel.requestFocusInWindow();

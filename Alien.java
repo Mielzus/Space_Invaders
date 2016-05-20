@@ -85,6 +85,14 @@ public class Alien{
 	}
 	
 	/**
+	  * Sets the image to be displayed for this alien
+	  * @param image The image to display
+	  */
+	public void setIcon(ImageIcon image){
+		this.image = image;
+	}
+	
+	/**
 	  * Sets the visibility of the alien
 	  * @param draw true or false on whether to draw the alien
 	  */
